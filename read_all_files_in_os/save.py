@@ -34,8 +34,8 @@ class SaveToMysql:
     def __init__(self):
         try:
             self.db = pymysql.connect(host='47.97.118.247',
-                                      user='####',
-                                      password='########',
+                                      user='root',
+                                      password='sober123',
                                       database='small_applications',
                                       charset='utf8')
 
