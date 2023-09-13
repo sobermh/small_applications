@@ -25,11 +25,15 @@
 """
 import asyncio
 import os
+import platform
 import socket
 import threading
 import time
+import uuid
 
+import cpuinfo
 import psutil
+import wmi
 
 from read_all_files_in_os.save import SaveToMysql
 
@@ -39,15 +43,20 @@ class VerboseOs:
 
     def get_cpu_info(self):
         """cpu"""
-        # Get CPU count and usage percentage
-        cpu_count = psutil.cpu_count(logical=False)
-        cpu_percent = psutil.cpu_percent(interval=1, percpu=True)
-
-        print(f"CPU Count: {cpu_count}")
-        return f"{cpu_count}"
+        # # Get CPU count and usage percentage
+        # cpu_count = psutil.cpu_count(logical=False)
+        # cpu_percent = psutil.cpu_percent(interval=1, percpu=True)
+        #
+        # print(f"CPU Count: {cpu_count}")
+        # return f"{cpu_count}"
         # print("CPU Usage Percentage:")
         # for i, percent in enumerate(cpu_percent):
         #     print(f"Core {i + 1}: {percent}%")
+        info = cpuinfo.get_cpu_info()
+        for key, value in info.items():
+            if key == "brand_raw":
+                print(f"CPU: {value}")
+                return value
 
     def get_memory_info(self):
         """memory"""
@@ -59,17 +68,6 @@ class VerboseOs:
         # print(f"Available Memory: {virtual_memory.available / (1024 ** 3):.2f} GB")
         # print(f"Used Memory: {virtual_memory.used / (1024 ** 3):.2f} GB")
 
-    # def get_ip_info(self):
-    #     """ip"""
-    #     # Get the host name
-    #     host_name = socket.gethostname()
-    #
-    #     # Get the IP address associated with the host name
-    #     ip_address = socket.gethostbyname(host_name)
-    #
-    #     print(f"Host Name: {host_name}")
-    #     print(f"IP Address: {ip_address}")
-
     def get_ip_info(self):
         try:
             # Create a socket object to get the local IP address
@@ -78,7 +76,7 @@ class VerboseOs:
 
             # Connect to a remote server (doesn't actually send data)
             # s.connect(("8.8.8.8", 80))  # Google's public DNS server and port 80
-            s.connect(("114.114.114.144", 80))  # Google's public DNS server and port 80
+            s.connect(("114.114.114.144", 80))  #
 
             # Get the local IP address from the connected socket
             local_ip_address = s.getsockname()[0]
@@ -88,6 +86,39 @@ class VerboseOs:
             return local_ip_address
         except socket.error:
             return "Unable to retrieve IP address"
+
+    def get_mac_address(self):
+        mac = uuid.UUID(int=uuid.getnode()).hex[-12:]
+        mac_address = ':'.join([mac[e:e + 2] for e in range(0, 12, 2)])
+        print(f"Mac Address: {mac_address}")
+        return mac_address
+
+    def get_os_version(self):
+        # 获取计算机名称（设备名称）
+        device_name = platform.node()
+        try:
+            c = wmi.WMI()
+            os_info = c.Win32_OperatingSystem()[0]
+            print(f"Os Version: {os_info.Caption}")
+            print(f"device name: {device_name}")
+            return os_info.Caption, device_name
+        except Exception as e:
+            return f"Error: {str(e)}"
+
+    def get_flash_devices(self):
+        """获取闪存设备"""
+        flash_devices = []
+        partitions = psutil.disk_partitions(all=True)
+
+        for partition in partitions:
+            if "removable" in partition.opts or "cdrom" in partition.opts:
+                flash_devices.append({
+                    "device": partition.device,
+                    "mountpoint": partition.mountpoint,
+                    "fstype": partition.fstype
+                })
+        print(f"FLASH: {flash_devices}")
+        return flash_devices
 
 
 class FileScanner:
@@ -224,8 +255,11 @@ if __name__ == "__main__":
     os_instance = VerboseOs()
     mysql_instance = SaveToMysql()
     ip = str(os_instance.get_ip_info())
+    mac = str(os_instance.get_mac_address())
     cpu = str(os_instance.get_cpu_info())
     memory = str(os_instance.get_memory_info())
+    os_version, device_name = os_instance.get_os_version()
+    flash = str(os_instance.get_flash_devices())
     times = mysql_instance.read_scan_times(ip)
     try:
         if times > 0:
@@ -239,12 +273,12 @@ if __name__ == "__main__":
         print("=========正在保存数据========")
         # 保存到数据库中
         with open('./filepath.txt', 'rb') as file:
-            mysql_instance.insert_data(ip, memory, cpu, 1, error_msg="", data_txt=file.read())
+            mysql_instance.insert_data(ip, mac, memory, cpu, device_name, os_version, flash, 1, error_msg="",
+                                       data_txt=file.read())
     except Exception as e:
-        mysql_instance.insert_data(ip, memory, cpu, 0, error_msg=str(e), data_txt="")
+        mysql_instance.insert_data(ip, mac, memory, cpu, device_name, os_version, flash, 0, error_msg=str(e),
+                                   data_txt="")
         print(f"error:{e}")
     finally:
         os.remove("./filepath.txt")
         mysql_instance.close_db()
-    # read_instance = FileScanner()
-    # print(read_instance.get_entire_disks())

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0acdaee2-8bf5-4226-85a1-793e9da6b668" name="变更" comment="获取主机所有的.exe文件，并排除系统.exe文件，并将程序转化为可执行的.exe文件">
+    <list default="true" id="0acdaee2-8bf5-4226-85a1-793e9da6b668" name="变更" comment="排除Z盘的影响">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/read_all_files_in_os/read.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_all_files_in_os/read.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_all_files_in_os/save.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_all_files_in_os/save.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,7 +104,21 @@
       <option name="project" value="LOCAL" />
       <updated>1694506758362</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="排除Z盘的影响">
+      <created>1694569363775</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1694569363775</updated>
+    </task>
+    <task id="LOCAL-00003" summary="排除Z盘的影响">
+      <created>1694569639917</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1694569639917</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -134,11 +149,12 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="获取主机所有的.exe文件，并排除系统.exe文件，并将程序转化为可执行的.exe文件" />
-    <option name="LAST_COMMIT_MESSAGE" value="获取主机所有的.exe文件，并排除系统.exe文件，并将程序转化为可执行的.exe文件" />
+    <MESSAGE value="排除Z盘的影响" />
+    <option name="LAST_COMMIT_MESSAGE" value="排除Z盘的影响" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/small_applications$demo.coverage" NAME="demo 覆盖结果" MODIFIED="1694482467148" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/small_applications$read.coverage" NAME="read 覆盖结果" MODIFIED="1694569161274" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/read_all_files_in_os" />
+    <SUITE FILE_PATH="coverage/small_applications$read.coverage" NAME="read 覆盖结果" MODIFIED="1694574109855" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/read_all_files_in_os" />
     <SUITE FILE_PATH="coverage/small_applications$small_applications.coverage" NAME="small_applications 覆盖结果" MODIFIED="1694150948073" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.." />
     <SUITE FILE_PATH="coverage/small_applications$save.coverage" NAME="save 覆盖结果" MODIFIED="1694506082910" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/read_all_files_in_os" />
   </component>
