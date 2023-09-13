@@ -122,6 +122,10 @@ class FileScanner:
                 # disk = psutil.disk_usage(partition.mountpoint)
                 # total_size = disk.total  # 总容量
                 # if total_size > 0:
+                # print(partition)
+                # 排除Z盘
+                if partition.mountpoint == "Z:\\":
+                    continue
                 disk_list.append(partition.mountpoint)
             except Exception as e:
                 print(str(e))
@@ -217,7 +221,6 @@ class FileScanner:
 
 
 if __name__ == "__main__":
-
     os_instance = VerboseOs()
     mysql_instance = SaveToMysql()
     ip = str(os_instance.get_ip_info())
@@ -243,3 +246,5 @@ if __name__ == "__main__":
     finally:
         os.remove("./filepath.txt")
         mysql_instance.close_db()
+    # read_instance = FileScanner()
+    # print(read_instance.get_entire_disks())
