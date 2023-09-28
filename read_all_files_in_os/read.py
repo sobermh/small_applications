@@ -27,6 +27,7 @@ import asyncio
 import os
 import platform
 import socket
+import subprocess
 import threading
 import time
 import uuid
@@ -43,20 +44,23 @@ class VerboseOs:
 
     def get_cpu_info(self):
         """cpu"""
-        # # Get CPU count and usage percentage
-        # cpu_count = psutil.cpu_count(logical=False)
-        # cpu_percent = psutil.cpu_percent(interval=1, percpu=True)
-        #
-        # print(f"CPU Count: {cpu_count}")
-        # return f"{cpu_count}"
-        # print("CPU Usage Percentage:")
-        # for i, percent in enumerate(cpu_percent):
-        #     print(f"Core {i + 1}: {percent}%")
-        info = cpuinfo.get_cpu_info()
-        for key, value in info.items():
-            if key == "brand_raw":
-                print(f"CPU: {value}")
-                return value
+        try:
+            if platform.system() == "Windows":
+                result = subprocess.check_output(["wmic", "cpu", "get", "name"])
+                cpu_model = result.decode("utf-8").strip().split('\n')[1]
+                print(f"CPU Model: {cpu_model}")
+                return cpu_model
+            elif platform.system() == "Linux":
+                result = subprocess.check_output(["cat", "/proc/cpuinfo"])
+                lines = result.decode("utf-8").strip().split('\n')
+                for line in lines:
+                    if "model name" in line:
+                        cpu_model = line.split(":")[1].strip()
+                        return f"CPU Model: {cpu_model}"
+            else:
+                return "Unsupported OS"
+        except Exception as e:
+            return str(e)
 
     def get_memory_info(self):
         """memory"""
@@ -124,14 +128,14 @@ class VerboseOs:
 class FileScanner:
     """扫描文件"""
 
-    def __init__(self):
+    def __init__(self, ip, name):
         self.file_lock = threading.Lock()  # 添加文件写入锁
         self.stop_threads = False  # 线程停止标志
-
+        self.filename = f"{name}-{ip}.txt"
         # 在初始化时检测文件是否存在
-        if os.path.exists('filepath.txt'):
+        if os.path.exists(self.filename):
             # 如果文件存在，清空文件内容
-            with open('filepath.txt', 'w') as file:
+            with open(self.filename, 'w') as file:
                 file.truncate(0)
 
     # def get_disk_size(self, partition):
@@ -169,7 +173,7 @@ class FileScanner:
         :param disk: 磁盘
         :return:
         """
-        print(f"Scanning {disk}...")
+        # print(f"Scanning {disk}...")
         files_to_scan = []
 
         for root, dirs, files in os.walk(disk):
@@ -183,11 +187,11 @@ class FileScanner:
         files_to_write = self.remove_repeated_exe(files_to_scan)
 
         with self.file_lock:  # 使用文件写入锁来确保线程安全
-            with open("filepath.txt", 'a', encoding="utf-8") as f:  # a,追加
+            with open(self.filename, 'a', encoding="utf-8") as f:  # a,追加
                 for filepath in files_to_write:
                     f.write(filepath + '\n')
 
-        print(f"Scanning {disk} over")
+        # print(f"Scanning {disk} over")
 
     def list_files(self, disk_list):
         """
@@ -212,7 +216,7 @@ class FileScanner:
 
         # 使用 for 循环遍历 threads 列表，并在每个线程上调用 thread.join()，这将等待每个线程执行完毕，确保所有线程都已完成后再继续执行主线程
         for thread in threads:
-            thread.join(10 * 60)
+            thread.join(60 * 60 *24)
         unfinished_threads = [thread for thread in threads if thread.is_alive()]
         if len(unfinished_threads) > 0:
             self.stop_threads = True
@@ -251,34 +255,61 @@ class FileScanner:
         raise TimeoutError("timeout")
 
 
+class TimerThread(threading.Thread):
+    def __init__(self):
+        super().__init__()
+        self.stop_event = threading.Event()  # 用于停止线程的事件
+        self.start_time = time.time()
+
+    def run(self):
+        while not self.stop_event.is_set():
+            elapsed_time = int(time.time() - self.start_time)
+            print(f"\rElapsed Time: {elapsed_time} seconds", end='', flush=True)
+            time.sleep(1)
+
+    def stop(self):
+        self.stop_event.set()
+
+
 if __name__ == "__main__":
+    # 在主线程中创建计时线程
+    timer_thread = TimerThread()
+
+    name = input(f"请输入工号:")
     os_instance = VerboseOs()
-    mysql_instance = SaveToMysql()
     ip = str(os_instance.get_ip_info())
     mac = str(os_instance.get_mac_address())
     cpu = str(os_instance.get_cpu_info())
     memory = str(os_instance.get_memory_info())
     os_version, device_name = os_instance.get_os_version()
     flash = str(os_instance.get_flash_devices())
+    mysql_instance = SaveToMysql()
     times = mysql_instance.read_scan_times(ip)
     try:
         if times > 0:
             print(f"========本机已成功进行{times}次扫描========")
         print("=========开始扫描========")
         print("=========扫描结束会自动关闭窗口，如扫描时间超过15分钟，请联系管理员................")
-        read_instance = FileScanner()
+
+        # 启动计时线程
+        timer_thread.start()
+        #  执行扫描代码
+        read_instance = FileScanner(ip, name)
         disks = read_instance.get_entire_disks()
         read_instance.list_files(disks)
         print("=========结束扫描========")
         print("=========正在保存数据========")
         # 保存到数据库中
-        with open('./filepath.txt', 'rb') as file:
-            mysql_instance.insert_data(ip, mac, memory, cpu, device_name, os_version, flash, 1, error_msg="",
+        with open(f'./{name}-{ip}.txt', 'rb') as file:
+            mysql_instance.insert_data(name, ip, mac, memory, cpu, device_name, os_version, flash, 1, error_msg="",
                                        data_txt=file.read())
     except Exception as e:
-        mysql_instance.insert_data(ip, mac, memory, cpu, device_name, os_version, flash, 0, error_msg=str(e),
+        mysql_instance.insert_data(name, ip, mac, memory, cpu, device_name, os_version, flash, 0, error_msg=str(e),
                                    data_txt="")
         print(f"error:{e}")
     finally:
-        os.remove("./filepath.txt")
+        # os.remove("./filepath.txt")
+        # 停止计时线程
+        timer_thread.stop()
+        timer_thread.join()  # 等待计时线程结束
         mysql_instance.close_db()
