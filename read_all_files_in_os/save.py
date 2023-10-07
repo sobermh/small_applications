@@ -33,9 +33,14 @@ import pymysql
 class SaveToMysql:
     def __init__(self):
         try:
-            self.db = pymysql.connect(host='47.97.118.247',
-                                      user='root',
-                                      password='sober123',
+            # self.db = pymysql.connect(host='47.97.118.247',
+            #                           user='root',
+            #                           password='sober123',
+            #                           database='small_applications',
+            #                           charset='utf8')
+            self.db = pymysql.connect(host='',
+                                      user='',
+                                      password='',
                                       database='small_applications',
                                       charset='utf8')
 
@@ -57,42 +62,59 @@ class SaveToMysql:
     def create_table(self):
         """创建数据库表"""
         sql = """create table if not exists save_files(
-            id  int(11) primary key auto_increment,
-            ip     varchar(25) not null ,
-            memory varchar(25),
-            cpu    varchar(25),
-            is_success boolean,
-            error_msg  text,
-            file_data longblob           // if you are using a TEXT or BLOB data type, you can modify it to LONGTEXT or LONGBLOB, which can hold even larger amounts of data.
+                id          int(11) primary key auto_increment,
+                name        varchar(25),
+                ip          varchar(25) not null,
+                mac         varchar(100),
+                memory      varchar(25),
+                cpu         varchar(100),
+                device_name varchar(100),
+                os_version  varchar(100),
+                flash       varchar(255),
+                is_success  boolean,
+                error_msg   varchar(255),
+                file_data   longblob,
+                update_time datetime,
+                create_time datetime
         ); """
         self.cursor.execute(sql)
         print("数据表创建成功")
 
-    def insert_data(self, ip, memory, cpu, is_success, error_msg, data_txt):
+    def insert_data(self, name, ip, mac, memory, cpu, device_name, os_version, flash, is_success, error_msg, data_txt):
         """save files and os data"""
-        print(ip, memory, cpu, error_msg, data_txt)
+        # print(name,ip, memory, cpu, error_msg, data_txt)
         try:
             sql = f"""
-                insert into save_files(`ip`, `memory`, `cpu`,`is_success`,`error_msg`,`file_data`, `create_time`, `update_time`) values ( %s,%s,%s,%s,%s,%s,%s,%s);
+                insert into save_files(`name`,`ip`,`mac`, `memory`, `cpu`,`device_name`,`os_version`,`flash`,`is_success`,
+                `error_msg`,`file_data`, `create_time`, `update_time`) values ( %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);
             """
             create_time = datetime.datetime.now()
             update_time = datetime.datetime.now()
-            values = (ip, memory, cpu, is_success, error_msg, data_txt, create_time, update_time)
+            values = (
+                name, ip, mac, memory, cpu, device_name, os_version, flash, is_success, error_msg, data_txt,
+                create_time,
+                update_time)
             self.cursor.execute(sql, values)
             self.db.commit()
         except Exception as e:
             print(e)
+            raise e
 
-    def read_data(self, ip):
+    def read_data(self, ip=None):
         """read data from database"""
         try:
-            sql = "select * from save_files where ip = %s;"
-            self.cursor.execute(sql, ip)
+            if ip:
+                sql = "select * from save_files where ip = %s;"
+                self.cursor.execute(sql, ip)
+            else:
+                sql = "select * from save_files;"
+                self.cursor.execute(sql)
             res = self.cursor.fetchall()
             for row in res:
-                print(row)
-                with open(f'{row[1]}.txt', 'wb') as file:
-                    file.write(row[6])
+                # print(row)
+                with open(f'../files/{row[1]}_{row[2]}.txt', 'wb') as file:
+                    file.write(row[11])
+                    # print(file.read())
                     print("BLOB data successfully converted and saved as output.txt")
         except Exception as e:
             print(f"Error:{e}")
@@ -114,4 +136,6 @@ class SaveToMysql:
 if __name__ == '__main__':
     instance = SaveToMysql()
     # instance.create_table()
-    instance.read_data('192.168.2.2')
+    instance.read_data()
+    # instance.read_data('172.16.10.123')
+    instance.close_db()
