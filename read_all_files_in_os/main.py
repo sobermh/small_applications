@@ -57,21 +57,20 @@ def main():
         mysql_instance.close_db()
 
 
-def get_require_user():
+def get_require_user(*args):
     """
     找到符合条件的有哪些用户
     :return: 在同文件夹下生成一个finally.txt文件
     """
     find_instance = Find()
-    find_instance.save_find_username("autocad", "photoshop", "solid", "altium designer", "graphpad", "matlab",
-                                     "pycharm")
+    find_instance.save_find_username(*args)
     find_instance.close_db()
 
 
 def get_remain_user():
     """
     找到没有别扫描的用户
-    :return: 打印用户列表
+    :return: 打印用户列表,以及
     """
     find_instance = Find()
     find_instance.find_user()
@@ -99,5 +98,7 @@ def get_all_oa_user():
 
 if __name__ == '__main__':
     # 扫描开始
-    main()
-    #
+    # main()
+    # get_remain_user()
+    # get_all_files()
+    get_require_user("autocad", "photoshop", "solid", "altium designer", "graphpad", "matlab", "pycharm")
