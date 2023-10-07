@@ -3,6 +3,7 @@
 Code is far away from bug
 """
 import os
+import re
 
 from read_all_files_in_os.oa_api import InteractiveOaApi
 from read_all_files_in_os.save import SaveToMysql
@@ -28,7 +29,7 @@ class Find(SaveToMysql):
                 one_file_dict["ip"] = str(row[2])
                 all_file_list.append(one_file_dict)
             # print(all_file_list)
-            print(len(all_file_list))
+            print("user in mysql:", len(all_file_list))
             return all_file_list
         except Exception as e:
             print(f"Error:{e}")
@@ -86,12 +87,55 @@ class Find(SaveToMysql):
                 file.write(str(category_username_list[index]) + '\n')
                 file.write("---------------" + '\n')
 
+    def find_user(self):
+        """找到没有扫描的人员"""
+        try:
+            sql = "select name from save_files;"
+            self.cursor.execute(sql)
+            res = self.cursor.fetchall()
+            # 数据库已扫描的
+            sql_list = []
+            for i in res:
+                sql_list.append(i[0])
+            # oa中公司所有人
+            remain_list = []
+            oa_user_list = InteractiveOaApi().get_all_oa_member()
+            # for i in oa_user_list:
+            #     oa_list.append(i["username"])
+            for oa_user in oa_user_list:
+                flag = 0
+                for sql_user in sql_list:
+                    if sql_user.lower() == oa_user["username"].lower():
+                        flag = 1
+                        break
+                if flag == 0:
+                    match = re.match(r"^\w+-1$", oa_user["username"])
+                    if match is None :
+                        # print(oa_user["username"])
+                        # print(match.group())
+                        # if oa_user["subcompanyid1span_in_oa"] == "杭州汇健科技有限公司":
+                        #     dict = {
+                        #         "name": oa_user["name"],
+                        #         "username": oa_user["username"]
+                        #     }
+                        #     remain_list.append(dict)
+                        remain_list.append(oa_user)
+            print(remain_list)
+            print(len(remain_list))
+        except Exception as e:
+            print(f"Error:{e}")
 
-if __name__ == '__main__':
-    find_instance = Find()
-    # find_instance.all_files()
-    # find_instance.according_condition_find_file("cad", "photoshop")
-    # find_instance.find_username("cad", "photoshop")
-    find_instance.save_find_username("autocad", "photoshop", "solid", "altium designer", "graphpad", "matlab","anaconda")
 
-    find_instance.close_db()
+# if __name__ == '__main__':
+#     find_instance = Find()
+#     # find_instance.all_files()
+#     # find_instance.according_condition_find_file("cad", "photoshop")
+#     # find_instance.find_username("cad", "photoshop")
+#
+#     # 找到符合要求的用户
+#     find_instance.save_find_username("autocad", "photoshop", "solid", "altium designer", "graphpad", "matlab","pycharm")
+#
+#     # 找到没扫描的人
+#     find_instance.find_user()
+#
+#     find_instance.close_db()
