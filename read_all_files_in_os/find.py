@@ -110,21 +110,20 @@ class Find(SaveToMysql):
                         break
                 if flag == 0:
                     match = re.match(r"^\w+-1$", oa_user["username"])
-                    if match is None :
+                    if match is None and "杭州汇健科技有限公司" == oa_user["subcompanyid1span_in_oa"]:
                         # print(oa_user["username"])
                         # print(match.group())
-                        # if oa_user["subcompanyid1span_in_oa"] == "杭州汇健科技有限公司":
-                        #     dict = {
-                        #         "name": oa_user["name"],
-                        #         "username": oa_user["username"]
-                        #     }
-                        #     remain_list.append(dict)
-                        remain_list.append(oa_user)
+                        user_dict = {
+                            "name": oa_user["name"],
+                            "username": oa_user["username"],
+                            "subcompanyid1span_in_oa": oa_user["subcompanyid1span_in_oa"],
+                            "departmentidspan_in_oa": oa_user["departmentidspan_in_oa"]
+                        }
+                        remain_list.append(user_dict)
             print(remain_list)
             print(len(remain_list))
         except Exception as e:
             print(f"Error:{e}")
-
 
 # if __name__ == '__main__':
 #     find_instance = Find()
