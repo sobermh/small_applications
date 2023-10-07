@@ -38,9 +38,9 @@ class SaveToMysql:
             #                           password='sober123',
             #                           database='small_applications',
             #                           charset='utf8')
-            self.db = pymysql.connect(host='',
-                                      user='',
-                                      password='',
+            self.db = pymysql.connect(host='172.16.0.199',
+                                      user='root',
+                                      password='hj123456',
                                       database='small_applications',
                                       charset='utf8')
 
@@ -132,10 +132,9 @@ class SaveToMysql:
     def close_db(self):
         self.db.close()
 
-
-if __name__ == '__main__':
-    instance = SaveToMysql()
-    # instance.create_table()
-    instance.read_data()
-    # instance.read_data('172.16.10.123')
-    instance.close_db()
+# if __name__ == '__main__':
+#     instance = SaveToMysql()
+#     # instance.create_table()
+#     instance.read_data()
+#     # instance.read_data('172.16.10.123')
+#     instance.close_db()

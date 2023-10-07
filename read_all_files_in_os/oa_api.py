@@ -28,15 +28,11 @@
 # from apps.user.models import User
 import requests
 
-
-
-
 # oa服务访问地址
 OA_HOST = "http://39.170.75.112:9019"
 # OA超级管理员账号
 OA_SUPER_USERNAME = "idc"
 OA_SUPER_PASSWORD = "idc!@123456"
-
 
 
 class HRM:
@@ -200,7 +196,6 @@ class InteractiveOaApi(HRM, Flow, MonitorFlow):
         response_json = self.get_member_info(userid).json()
         return response_json["simpleInfo"]["managerName"]
 
-
 # if __name__ == '__main__':
-#     userlist = InteractiveOaApi().get_all_oa_member()
-#     print(userlist)
+#     user_list = InteractiveOaApi().get_all_oa_member()
+#     print(user_list)
