@@ -101,4 +101,4 @@ if __name__ == '__main__':
     # main()
     # get_remain_user()
     # get_all_files()
-    get_require_user("autocad", "photoshop", "solid", "altium designer", "graphpad", "matlab", "pycharm")
+    get_require_user("autocad", "photoshop", "solidworks", "altium designer", "graphpad", "matlab")

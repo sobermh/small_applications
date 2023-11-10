@@ -110,7 +110,7 @@ class Find(SaveToMysql):
                         break
                 if flag == 0:
                     match = re.match(r"^\w+-1$", oa_user["username"])
-                    if match is None and "杭州汇健科技有限公司" == oa_user["subcompanyid1span_in_oa"]:
+                    if match is None:
                         # print(oa_user["username"])
                         # print(match.group())
                         user_dict = {
